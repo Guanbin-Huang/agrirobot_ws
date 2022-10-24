@@ -1,0 +1,27 @@
+<launch>
+  <!-- FRONT CAMERA -->
+  <arg name="camera_name" value="front_cam"/>
+  <group ns="$(arg camera_name)">
+
+    <remap from="/$(arg camera_name)/color/image_raw"   to="/rs_nav_front/color/image_raw" />
+    <node name="front_img_node" pkg="db_camera" type="front_img.py" output="screen" />
+   
+    <!-- for publishing the info of camera -->
+    <remap from="/$(arg camera_name)/color/camera_info" to="/rs_nav_front/color/camera_info" />
+    <node name="front_info_node" pkg="db_camera" type="front_cam_info.py" output="screen" respawn="true" />
+  </group>
+  
+  
+  <!-- BACK CAMERA -->
+  <arg name="camera_name2" value="back_cam"/>
+  <group ns="$(arg camera_name2)">
+
+    <remap from="/$(arg camera_name2)/color/image_raw"   to="/rs_nav_back/color/image_raw" />
+    <node name="back_img_node" pkg="db_camera" type="back_img.py" output="screen" />
+   
+    <!-- for publishing the info of camera -->
+    <remap from="/$(arg camera_name2)/color/camera_info" to="/rs_nav_back/color/camera_info" />
+    <node name="back_info_node" pkg="db_camera" type="back_cam_info.py" output="screen" respawn="true" />
+  </group>
+
+</launch>

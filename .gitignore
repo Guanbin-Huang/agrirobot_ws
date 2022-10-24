@@ -1,0 +1,5 @@
+devel
+build
+other_pkgs
+src/db_camera/.vscode/browse.vc.db
+*.pyc

@@ -1,0 +1,15 @@
+<?xml version="1.0"?>
+
+<launch>
+    <!-- the following is the raw file -->
+    <arg name="robot_name" default="phenobot" />
+    <arg name="tf_prefix" default=""/>
+
+    <!-- <arg name="use_rviz" default="true"/> -->
+
+    <!-- Run visual-servoing navigation  -->
+    <group ns="phenobot">
+    <rosparam command="load" file="$(find vs_crop_row_nav)/configs/params.yaml" />
+    <node name="vs_navigation" pkg="vs_crop_row_nav" type="vs_navigationNode.py" output="screen" /> 
+  </group>
+</launch>
