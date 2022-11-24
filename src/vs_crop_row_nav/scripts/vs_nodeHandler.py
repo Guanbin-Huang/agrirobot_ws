@@ -39,13 +39,10 @@ class vs_nodeHandler:
         ####################################### 1. FRONT CAMERA #######################################
         # subscribed Topics (Images of front and back camera)
         self.frontColor_topic = rospy.get_param('frontColor_topic')
-        # self.frontDepth_topic = rospy.get_param('frontDepth_topic')
         self.frontCameraInfo_topic = rospy.get_param('frontCameraInfo_topic')
 
         self.frontColor_sub = message_filters.Subscriber(
             self.frontColor_topic, Image, queue_size=self.queue_size)
-        # self.frontDepth_sub = message_filters.Subscriber(
-            # self.frontDepth_topic, Image, queue_size=self.queue_size)
         self.frontCameraInfo_sub = message_filters.Subscriber(
             self.frontCameraInfo_topic, CameraInfo, queue_size=self.queue_size)
 
@@ -67,12 +64,12 @@ class vs_nodeHandler:
         ###################################################################################################
 
         # Initialize ros publisher, ros subscriber, topics we publish
-        self.graphic_pub = rospy.Publisher('vs_nav/graphic',Image, queue_size=1)
-        self.mask_pub = rospy.Publisher('vs_nav/mask',Image, queue_size=1)
-        self.exg_pub = rospy.Publisher('vs_nav/ExG',Image, queue_size=1)
+        self.graphic_pub = rospy.Publisher('vs_nav/graphic',Image, queue_size=self.queue_size)
+        self.mask_pub = rospy.Publisher('vs_nav/mask',Image, queue_size=self.queue_size)
+        self.exg_pub = rospy.Publisher('vs_nav/ExG',Image, queue_size=self.queue_size)
 
         cmd_vel_topic = rospy.get_param('cmd_vel_topic')
-        self.velocity_pub = rospy.Publisher(cmd_vel_topic, Twist, queue_size=1)
+        self.velocity_pub = rospy.Publisher(cmd_vel_topic, Twist, queue_size=self.queue_size)
 
         # settings
         # Mode 1: Driving forward with front camera (starting mode)
@@ -165,17 +162,14 @@ class vs_nodeHandler:
         ############################### trigger callback functions when images come ##############################
         self.ts = message_filters.ApproximateTimeSynchronizer(
             [self.frontColor_sub, 
-            # self.frontDepth_sub, 
-            self.frontCameraInfo_sub], queue_size=self.queue_size, slop=0.5)
+            self.frontCameraInfo_sub], queue_size=self.queue_size, slop = 50, allow_headerless=True)
         self.ts.registerCallback(self.frontSyncCallback)
 
         self.ts = message_filters.ApproximateTimeSynchronizer(
             [self.backColor_sub, 
-            # self.backDepth_sub, 
-            self.backCameraInfo_sub], queue_size=self.queue_size, slop=0.5)
+            self.backCameraInfo_sub], queue_size=self.queue_size, slop = 50, allow_headerless=True)
         self.ts.registerCallback(self.backSyncCallback)
         ############################### trigger callback functions when images come ##############################
-
 
         rospy.loginfo('Detection Camera initialised..')
         print('')
@@ -197,7 +191,7 @@ class vs_nodeHandler:
             # this is only False if the initialization in 'setImage' was unsuccessful
             rospy.logwarn("The initialization was unsuccessful!! ")
         else:
-            print("cropLaneFound", self.imageProcessor.cropLaneFound, "cropRowEnd", self.imageProcessor.cropRowEnd)
+            print("cropLaneFound ---------------------------------------------", self.imageProcessor.cropLaneFound, "cropRowEnd", self.imageProcessor.cropRowEnd)
             # if the robot is currently following a line and is not turning just compute the controls
             if self.isFollowingLane() :
                 self.imageProcessor.trackCropLane(self.navigationMode)
@@ -272,6 +266,7 @@ class vs_nodeHandler:
         self.imageProcessor.drawGraphics()
         graphic_img = self.bridge.cv2_to_imgmsg(self.imageProcessor.graphicsImg, encoding='bgr8')
         self.graphic_pub.publish(graphic_img)
+        print("publish(graphic_img)")
         # publish predicted Mask
         mask_msg = CvBridge().cv2_to_imgmsg(self.imageProcessor.mask)
         mask_msg.header.stamp = rospy.Time.now()
@@ -300,7 +295,7 @@ class vs_nodeHandler:
         self.velocity_pub.publish(self.velocityMsg)
 
     def frontSyncCallback(self, rgbImage, camera_info_msg):
-        print("--------------- frontSyncCallback ----------------")
+        print("\n\n\n--------------- frontSyncCallback ----------------")
         self.cameraModel.fromCameraInfo(camera_info_msg)
         try:
             # Convert your ROS Image message to OpenCV2
@@ -329,9 +324,12 @@ class vs_nodeHandler:
             # compute and publish robot controls if the image is currently used
             if self.primaryCamera:
                 self.navigate()
+
+        print("---------------END frontSyncCallback ----------------\n\n\n")
+        
     
     def backSyncCallback(self, rgbImage, camera_info_msg): # db_cam
-        print("--------------- backSyncCallback ----------------")
+        # print("\n\n\n--------------- backSyncCallback ----------------")
         self.cameraModel.fromCameraInfo(camera_info_msg)
         
         try:
@@ -353,6 +351,8 @@ class vs_nodeHandler:
             #               0.0, 1.0, cv.NORM_MINMAX)
         except CvBridgeError as e:
             print(e)
+        # print("---------------END backSyncCallback ----------------\n\n\n")
+        
 
         # get image size
         self.imgHeight, self.imgWidth, self.imgCh = self.backImg.shape

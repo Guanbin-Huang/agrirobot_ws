@@ -93,6 +93,7 @@ class imageProc:
         if not self.isInitialized:
             print("#[INF] Find Crop Lane")
             self.lines2D, self.linesROIs2D = self.findCropRows2D(self.primaryRGBImg)
+            print()
             # self.lines3D, self.linesROIs3D = self.findCropRows3D(self.mask, self.plantCenters2D, self.primaryDepthImg)
             # merge both predictions to get more robust results!
 
@@ -115,6 +116,7 @@ class imageProc:
     def findCropRows2D(self, rgbImg):
         # search for lines at given window locations using LQ-Adjustment
         lines, linesROIs, _ = self.findLinesInImage()
+        print("xxxxxxxxxxxxxxxxxxxxxxxxx")
         # if any feature is observed during the scan
         if len(lines) != 0:
             np.set_printoptions(suppress=True)
@@ -214,6 +216,7 @@ class imageProc:
         Returns:
             _type_: lines in image
         """
+
         # initialization
         lines = np.zeros((len(self.scanFootSteps), 2))
         trackingWindows = np.zeros((len(self.scanFootSteps), 1))
