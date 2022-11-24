@@ -2,4 +2,9 @@ devel
 build
 other_pkgs
 src/db_camera/.vscode/browse.vc.db
+src/vs_crop_row_nav/.vscode/browse.vc.db
 *.pyc
+.vscode/browse*
+*.bag
+*.mp4
+*.tar.gz

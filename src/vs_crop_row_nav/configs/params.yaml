@@ -11,10 +11,10 @@
 
 # thorvald
 frontColor_topic: '/rs_nav_front/color/image_raw'
-frontDepth_topic: '/rs_nav_front/aligned_depth_to_color/image_raw'
+# frontDepth_topic: '/rs_nav_front/aligned_depth_to_color/image_raw'
 frontCameraInfo_topic: '/rs_nav_front/color/camera_info'
 backColor_topic: '/rs_nav_back/color/image_raw'
-backDepth_topic: '/rs_nav_back/aligned_depth_to_color/image_raw'
+# backDepth_topic: '/rs_nav_back/aligned_depth_to_color/image_raw'
 backCameraInfo_topic: '/rs_nav_back/color/camera_info'
 
 # in experiments of the paper we use neither odom nor IMU !
@@ -76,23 +76,23 @@ p1:
  - 0
  - 0
 p2:
- - 350
- - 0
+ - 256 # 640 / 5 x 
+ - 0   # y
 p3:
- - 10
- - 720
+ - 91
+ - 480
 p4:
  - 0
- - 720
+ - 480
 p5: 
- - 830
+ - 384
  - 0
 p6:
- - 1280
+ - 640
  - 0
 p7:
- - 1280
- - 720
+ - 640
+ - 480
 p8: 
- - 1270
- - 720
+ - 545
+ - 480

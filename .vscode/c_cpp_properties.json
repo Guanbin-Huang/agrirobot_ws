@@ -6,7 +6,6 @@
         "limitSymbolsToIncludedHeaders": false
       },
       "includePath": [
-        "/home/huanyu-pc/agribot_ws/devel/include/**",
         "/opt/ros/melodic/include/**",
         "/usr/include/**"
       ],

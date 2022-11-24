@@ -73,13 +73,12 @@ class imageProc:
 
         self.numOfCropRows = len(self.rowTrackingBoxes) 
 
-    def findCropLane(self, rgbImg, depthImg, mode='RGB-D', bushy=False):
-        """finds Crops Rows in the image based on RGB and depth data
+    def findCropLane(self, rgbImg, mode='RGB', bushy=False):
+        """finds Crops Rows in the image based on RGB
         Args:
             bushy (bool, optional): _description_. Defaults to False.
         """
         self.primaryRGBImg = rgbImg.copy()
-        self.primaryDepthImg = depthImg.copy()
         self.imgHeight, self.imgWidth, self.imgChannels = rgbImg.shape
         # if crop canopy type is busshy like Coriander
         self.bushy = bushy
@@ -428,20 +427,26 @@ class imageProc:
         # Erotion
         # er_kernel = np.ones((10,10),dtype=np.uint8) # this must be tuned
         # binaryMask= cv.erode(binaryMask, er_kernel)
+        
+        import cv2
+        cv2.imwrite("greenIDX.jpg", greenIDX)
+        cv2.imwrite("binaryMask.jpg", binaryMask)
 
         return binaryMask, greenIDX
+
+
 
     def applyROI(self, img):
         _img = img.copy()
         # defining ROI windown on the image
         if self.roiParams["enable_roi"]:
-            r_pts = [self.roiParams["p1"], self.roiParams["p2"],
-                     self.roiParams["p3"], self.roiParams["p4"]]
-            l_pts = [self.roiParams["p5"], self.roiParams["p6"],
-                     self.roiParams["p7"], self.roiParams["p8"]]
+            left_mask = [self.roiParams["p1"], self.roiParams["p2"],
+                         self.roiParams["p3"], self.roiParams["p4"]]
+            right_mask = [self.roiParams["p5"], self.roiParams["p6"],
+                          self.roiParams["p7"], self.roiParams["p8"]]
 
-            cv.fillPoly(_img, np.array([r_pts]), (0, 0, 0))
-            cv.fillPoly(_img, np.array([l_pts]), (0, 0, 0))
+            cv.fillPoly(_img, np.array([left_mask]), (0, 0, 0))
+            cv.fillPoly(_img, np.array([right_mask]), (0, 0, 0))
         return _img
 
     def cameraToImage(self, P):

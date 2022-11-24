@@ -6,6 +6,7 @@
     <arg name="tf_prefix" default=""/>
 
     <!-- <arg name="use_rviz" default="true"/> -->
+    <remap from="/$(arg robot_name)/twist_mux/cmd_vel" to="/cmd_vel" />
 
     <!-- Run visual-servoing navigation  -->
     <group ns="phenobot">

@@ -193,7 +193,7 @@ class vs_nodeHandler:
         # get the currently used image
         primaryRGB = self.getProcessingImage(self.frontImg,self.backImg)
         # If the feature extractor is not initialized yet, this has to be done
-        if not self.imageProcessor.findCropLane(primaryRGB, mode='RGB-D'):
+        if not self.imageProcessor.findCropLane(primaryRGB, mode='RGB'):
             # this is only False if the initialization in 'setImage' was unsuccessful
             rospy.logwarn("The initialization was unsuccessful!! ")
         else:
@@ -333,7 +333,7 @@ class vs_nodeHandler:
     def backSyncCallback(self, rgbImage, camera_info_msg): # db_cam
         print("--------------- backSyncCallback ----------------")
         self.cameraModel.fromCameraInfo(camera_info_msg)
-        print("here")
+        
         try:
             # Convert your ROS Image message to OpenCV2
             self.backImg = self.bridge.imgmsg_to_cv2(rgbImage, "bgr8")
@@ -437,13 +437,13 @@ class vs_nodeHandler:
             return False
     
     def isUsingFrontCamera(self):
-        if self.navigationMode == 1 or self.navigationMode == 5 or self.navigationMode == 6:
+        if self.navigationMode == 1 or self.navigationMode == 4: # or self.navigationMode == 6:
             return True
         else:
             return False
     
     def isUsingBackCamera(self):
-        if self.navigationMode == 2 or self.navigationMode == 3 or self.navigationMode == 4:
+        if self.navigationMode == 2 or self.navigationMode == 3: # or self.navigationMode == 4:
             return True
         else: 
             return False

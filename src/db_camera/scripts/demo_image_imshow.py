@@ -1,7 +1,7 @@
 #!/usr/bin/python
 
 import cv2
-cap = cv2.VideoCapture(2) # 0->front  2->back not sure
+cap = cv2.VideoCapture(0) # 0->front  2->back
 print(cap.isOpened())
 
 if not cap.isOpened():
@@ -9,6 +9,7 @@ if not cap.isOpened():
 
 while True:
     ret, frame = cap.read()
+    cv2.imwrite("frame.jpg", frame)
     
     if not ret:
         break

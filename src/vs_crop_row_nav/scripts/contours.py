@@ -32,7 +32,7 @@ def getContourCenter(contours):
 
 def getPlantMasks(binrayMask, min_contour_area, bushy=False):
         # find contours
-        contours = cv.findContours(binrayMask, cv.RETR_TREE, cv.CHAIN_APPROX_NONE)[1]
+        contours = cv.findContours(binrayMask, cv.RETR_TREE, cv.CHAIN_APPROX_NONE)[0]
 
         # cv.imshow("crop rows mask",self.mask)
         # self.handleKey()
