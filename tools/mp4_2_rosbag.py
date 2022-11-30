@@ -33,11 +33,11 @@ info.roi.do_rectify = False
 
 
 
-def CreateVideoBag(bagname = "mybag_1row.bag"):
+def CreateVideoBag(bagname = r"../mybag_front_back.bag"):
     '''Creates a bag file with n video files'''
     bag = rosbag.Bag(bagname, 'w')
-    cap1 = cv2.VideoCapture("/home/huanyu-pc/agrirobot_ws/tools/1row.mp4")
-    cap2 = cv2.VideoCapture("/home/huanyu-pc/agrirobot_ws/tools/nothing20s.mp4")
+    cap1 = cv2.VideoCapture("/home/huanyu-pc/agrirobot_ws/tools/front1.mp4")
+    cap2 = cv2.VideoCapture("/home/huanyu-pc/agrirobot_ws/tools/back1.mp4")
     
     cb = CvBridge()
 

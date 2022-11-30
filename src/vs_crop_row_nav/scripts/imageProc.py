@@ -49,7 +49,7 @@ class imageProc:
 
         self.cropRowEnd = False
 
-        self.trackingBoxLoc = []
+        self.trackingBxoxLoc = []
 
         # features
         self.allLineEnd = []
@@ -62,12 +62,12 @@ class imageProc:
         self.trackingWindowOffsBottom = 0
         self.trackingWindowTopScaleRatio = 0.4  # scales the top of the window
 
-        self.imgHeight, self.imgWidth = 720, 1280
+        self.imgHeight, self.imgWidth = 480, 640
 
-        # steps create linspace
+        # steps create linspace # from where we start each step
         self.scanFootSteps = np.linspace(self.scannerParams["scanStartPoint"],
                                          self.scannerParams["scanEndPoint"],
-                                         self.scannerParams["scanWindowWidth"])
+                                         self.imgWidth / self.scannerParams["scanStep"]) # e.g. np.linspace(0, 640, num = 128)
         self.rowTrackingBoxes = []
         self.updateTrackingBoxes()
 
@@ -90,7 +90,7 @@ class imageProc:
             # initial RGB image process to get mask GreenIDx and plant centers
             self.mask, self.greenIDX, self.plantObjects2D, self.plantCenters2D = self.processRGBImage(self.primaryRGBImg)
             self.numPlantsInScene = len(self.plantCenters2D[0])
-        if not self.isInitialized:
+        if not self.isInitialized: # go into it only when the first time you found the crop row. Then you just track it but not go into it.
             print("#[INF] Find Crop Lane")
             self.lines2D, self.linesROIs2D = self.findCropRows2D(self.primaryRGBImg)
             print()
@@ -104,6 +104,7 @@ class imageProc:
         linesROIs = []
         # project the plant centers to 3D
 
+
         # cluster points 
 
         # fit line on each cluster
@@ -115,7 +116,7 @@ class imageProc:
 
     def findCropRows2D(self, rgbImg):
         # search for lines at given window locations using LQ-Adjustment
-        lines, linesROIs, _ = self.findLinesInImage()
+        lines, linesROIs, _ = self.findLinesInImage() # 
         print("xxxxxxxxxxxxxxxxxxxxxxxxx")
         # if any feature is observed during the scan
         if len(lines) != 0:
@@ -225,8 +226,8 @@ class imageProc:
         # counting the points in the top and bottom half
         self.pointsInBottom = 0
         self.pointsInTop = 0
-        # for all windows
-        for boxIdx in range(0, self.numOfCropRows, 1):
+        # for all windows (slide the windows)
+        for boxIdx in range(0, self.numOfCropRows, 1): # here numOfCropRows are multiple windows
             # define window
             if self.isInitialized:
                 # get x values, where the top and bottom of the window intersect
@@ -241,29 +242,31 @@ class imageProc:
             plantsInCropRow = []
             for ptIdx in range(self.numPlantsInScene):
                 # checking #points in upper/lower half of the image
-                self.checkPlantsLocTB(self.plantCenters2D[:, ptIdx])
+                self.checkPlantsLocTB(self.plantCenters2D[:, ptIdx]) 
                 
                 # if plant center is inside tracking box
                 if self.rowTrackingBoxes[boxIdx].contains(Point(self.plantCenters2D[0, ptIdx], self.plantCenters2D[1, ptIdx])):
                     plantsInCropRow.append(self.plantCenters2D[:, ptIdx])
 
-            if len(plantsInCropRow) >= 2:
+            if len(plantsInCropRow) >= 2: # if there is at least two points in the sliding win, draw a line
                 # flipped points
-                ptsFlip = np.flip(plantsInCropRow, axis=1)
+                ptsFlip = np.flip(plantsInCropRow, axis=1) # from xy to yx  e.g. if [array([ 67., 289.]), array([ 82., 145.])] can be seen as [[ 67., 289.],[82., 145.]] 2x2
                 # get line at scanning window
-                xM, xB = getLineRphi(ptsFlip)
-                t_i, b_i = lineIntersectImgUpDown(xM, xB, self.imgHeight)
+                xM, xB = getLineRphi(ptsFlip) # original: y = kx + b ;   get the k and b : x = ky + b      xM-> k    xB->b
+                t_i, b_i = lineIntersectImgUpDown(xM, xB, self.imgHeight) 
                 l_i, r_i = lineIntersectImgSides(xM, xB, self.imgHeight)
-                # print("row ID:", boxIdx, t_i, b_i, l_i, r_i )
+                # if boxIdx == 4:
+                    # asdf = 12
+                print("row ID:", boxIdx, t_i, b_i, l_i, r_i )
                 # if the linefit does not return None and the line-image intersections
                 # are within the image bounds
                 if xM is not None and b_i >= 0 and b_i <= self.imgWidth:
-                    lines[boxIdx, :] = [xB, xM]
+                    lines[boxIdx, :] = [xB, xM] # this line is valid 
                     # store the window location, which generated these line
                     # parameters
-                    if self.isInitialized == False:
+                    if self.isInitialized == False: # self.isInitialized is false the first time you detect the crop row
                         trackingWindows[boxIdx] = self.scanFootSteps[boxIdx]
-                    # mean x value of all points used for fitting the line
+                    # use median value to choose the x value of all points used for fitting the line
                     meanLinesInWindows[boxIdx] = np.median(plantsInCropRow, axis=0)[0]
 
         # if the feature extractor is initalized, adjust the window
@@ -279,35 +282,40 @@ class imageProc:
         return lines, trackingWindows, meanLinesInWindows
 
     def updateTrackingBoxes(self, boxID=0, lineIntersection=None):
-
+        
         if not self.isInitialized and lineIntersection==None:
             # initial tracking Boxes 
             for i in range(len(self.scanFootSteps)):
+                # polygon
                 # window is centered around self.scanFootSteps[i]
-                boxBL_x = self.scanFootSteps[i]
+                boxBL_x = self.scanFootSteps[i] # bottom_left_x
                 boxBR_x = self.scanFootSteps[i] + self.trackerParams["trackingBoxWidth"]
-                boxTL_x = int(boxBL_x - self.trackerParams["trackingBoxWidth"]/2 * self.trackerParams["sacleRatio"])
-                boxTR_x = int(boxTL_x + self.trackerParams["trackingBoxWidth"] * self.trackerParams["sacleRatio"])
-                boxT_y = self.trackerParams["bottomOffset"]
-                boxB_y = self.imgHeight - self.trackerParams["topOffset"]
+                boxTL_x = int(boxBL_x - self.trackerParams["trackingBoxWidth"]/2 * self.trackerParams["scaleRatio"])
+                boxTR_x = int(boxTL_x + self.trackerParams["trackingBoxWidth"] * self.trackerParams["scaleRatio"])
+                boxT_y = self.trackerParams["bottomOffset"] # default = 0
+                boxB_y = self.imgHeight - self.trackerParams["topOffset"] # default = 0
+                
                 # store the corner points
                 self.rowTrackingBoxes.append(Polygon([(boxBR_x, boxB_y),
                                                       (boxBL_x, boxB_y), 
                                                       (boxTL_x, boxT_y),
                                                       (boxTR_x, boxT_y)]))
+
+  
         else:
             # window corner points are left and right of these
             boxBL_x = int(lineIntersection[0] - self.trackerParams["trackingBoxWidth"]/2)
             boxBR_x = int(boxBL_x + self.trackerParams["trackingBoxWidth"])
-            boxTL_x = int(lineIntersection[1] - self.trackerParams["trackingBoxWidth"]/2 * self.trackerParams["sacleRatio"])
-            boxTR_x = int(boxTL_x + self.trackerParams["trackingBoxWidth"] * self.trackerParams["sacleRatio"])
+            boxTL_x = int(lineIntersection[1] - self.trackerParams["trackingBoxWidth"]/2 * self.trackerParams["scaleRatio"])
+            boxTR_x = int(boxTL_x + self.trackerParams["trackingBoxWidth"] * self.trackerParams["scaleRatio"])
             boxT_y = self.trackerParams["bottomOffset"]
             boxB_y = self.imgHeight - self.trackerParams["topOffset"]
-            # store the corner points
+                
             self.rowTrackingBoxes[boxID] = Polygon([(boxBR_x, boxB_y),
                                                     (boxBL_x, boxB_y),
                                                     (boxTL_x, boxT_y),
                                                     (boxTR_x, boxT_y)])
+
 
     def checkPlantsInRows(self, cropRowID, plantsInCroRow):
 
@@ -318,7 +326,7 @@ class imageProc:
             return False   
 
     def checkPlantsLocTB(self, point):
-        if point[1] < self.imgHeight/2:
+        if point[1] < self.imgHeight/2: # point[1] --> y
             self.pointsInTop += 1
         else:
             self.pointsInBottom += 1
@@ -388,12 +396,12 @@ class imageProc:
         # change datatype to enable negative values for self.greenIDX calculation
         rgbImg = rgbImg.astype('int32')
         # apply ROI
-        rgbImg = self.applyROI(rgbImg)
+        rgbImg = self.applyROI(rgbImg) # refer to p1 ~ p8
         #  get green index and binary mask (Otsu is used for extracting the green)
         mask, greenIDX = self.getExgMask(rgbImg)
         # find contours
         plantObjects = getPlantMasks(
-            mask, self.contourParams["minContourArea"], bushy=False)
+            mask, self.contourParams["minContourArea"], bushy=False) # denoise by removing small contours.
         # get center of contours
         contCenterPTS = getContourCenter(plantObjects)
         x = contCenterPTS[:, 1]

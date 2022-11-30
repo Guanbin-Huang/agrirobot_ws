@@ -7,7 +7,7 @@ import copy
 
 # funciton to compute the moving standard deviation for a given window size
 
-def movingStd(data, winSize=5):
+def movingStd(data, winSize=5): # winSize here is stepSize
     _data = data.copy()
     # compute a moving standard deviation
     stdVec = np.zeros((len(_data)-winSize, 1))

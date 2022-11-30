@@ -95,13 +95,13 @@ class vs_nodeHandler:
         self.omegaBuffer = list()
 
         self.scannerParams = {
-            "scanSteps": rospy.get_param('scanSteps'),
+            "scanStep": rospy.get_param('scanStep'),
             "scanEndPoint": rospy.get_param('scanEndPoint'),
             "scanStartPoint": rospy.get_param('scanStartPoint'),
             "scanWindowWidth": rospy.get_param('scanWindowWidth')
         }
         #  in case of using bigger size image size, we suggest to set ROI 
-        self.rioParams = {
+        self.roiParams = {
             "enable_roi": rospy.get_param('enable_roi'),
             "p1": rospy.get_param('p1'),
             "p2": rospy.get_param('p2'),
@@ -126,7 +126,7 @@ class vs_nodeHandler:
         }
 
         self.trackerParams = {
-            "sacleRatio": rospy.get_param('sacleRatio'),
+            "scaleRatio": rospy.get_param('scaleRatio'),
             "topOffset": rospy.get_param('topOffset'),
             "bottomOffset": rospy.get_param('bottomOffset'),
             "trackingBoxWidth": rospy.get_param('trackingBoxWidth'),
@@ -153,7 +153,7 @@ class vs_nodeHandler:
         self.camera = cam.Camera(1,1.2,0,1,np.deg2rad(-80),0.96,0,0,1)
         self.imageProcessor = imc.imageProc(self.scannerParams,
                                             self.contourParams,
-                                            self.rioParams,
+                                            self.roiParams,
                                             self.trackerParams)
 
         self.cameraModel = image_geometry.PinholeCameraModel()
@@ -295,7 +295,7 @@ class vs_nodeHandler:
         self.velocity_pub.publish(self.velocityMsg)
 
     def frontSyncCallback(self, rgbImage, camera_info_msg):
-        print("\n\n\n--------------- frontSyncCallback ----------------")
+        # print("\n\n\n--------------- frontSyncCallback ----------------")
         self.cameraModel.fromCameraInfo(camera_info_msg)
         try:
             # Convert your ROS Image message to OpenCV2

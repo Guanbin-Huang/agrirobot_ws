@@ -65,7 +65,7 @@ def lineIntersectImgUpDown(m, b, imageHeight):
     Returns:
         _type_: top and bottom intersection points on image boarders
     """
-    # line calculations
+    # line calculations 
     b_i = b
     t_i = m * imageHeight + b
     return t_i, b_i
@@ -90,6 +90,6 @@ def getLineRphi(xyCords):
     Returns:
         _type_: r, phi of line
     """
-    x_coords, y_coords = zip(*xyCords)
-    coefficients = np.polyfit(x_coords, y_coords, 1)
-    return coefficients[0], coefficients[1]
+    x_coords, y_coords = zip(*xyCords)               # Least squares polynomial fit
+    coefficients = np.polyfit(x_coords, y_coords, 1) # https://numpy.org/doc/stable/reference/generated/numpy.polyfit.html#:~:text=numpy.polyfit(,%5Bsource%5D
+    return coefficients[0], coefficients[1] # k and b  if degree is 1

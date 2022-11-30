@@ -59,15 +59,15 @@ minMatchingDifference: 0
 # Threshold for keypoints
 minKeypointNum: 10
 # scanner window params
-scanSteps: 5
+scanStep: 5
 scanStartPoint: 0
-scanEndPoint: 1280
+scanEndPoint: 640
 scanWindowWidth: 128
 # tracker params
 trackingBoxWidth: 200
 topOffset: 0
 bottomOffset: 0
-sacleRatio: 0.4
+scaleRatio: 0.4
 # for dividing bushy rows
 maxCoutourHeight: 120
 #  in case of using bigger size image size, we suggest to set ROI 
